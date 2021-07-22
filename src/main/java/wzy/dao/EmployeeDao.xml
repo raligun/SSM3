@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wzy.dao.EmployeeDao">
+  <select id="queryEmpById" resultType="wzy.pojo.Employee">
+    select * from t_employee where id = #{id}
+  </select>
+
+  <insert id="insertEmp">
+  	insert into t_employee(empname,gender,email)values(#{empname},#{gender},#{email})
+  </insert>
+
+  <delete id="deleteEmpById">
+   delete from t_employee where id=#{id}
+  </delete>
+
+  <update id="updateEmp">
+  	update t_employee set empname=#{empname},gender=#{gender},email=#{email} where id=#{id}
+  </update>
+
+  <select id="queryAllEmpToList" resultType="wzy.pojo.Employee">
+    select * from t_employee
+  </select>
+
+  <select id="queryAllEmpToMap" resultType="wzy.pojo.Employee">
+    select * from t_employee
+  </select>
+
+  <insert id="insertBatch">
+    insert into t_employee(empname,gender,email)values
+    <foreach collection="emp" item="emp" separator=",">
+      (#{emp.empname},#{emp.gender},#{emp.email})
+    </foreach>
+  </insert>
+</mapper>

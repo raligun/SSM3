@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+<!--    spring扫描控制器，排除SpringMVC扫描过的-->
+    <context:component-scan base-package="wzy">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+<!--    引入配置文件-->
+    <context:property-placeholder location="classpath:Spring/jdbc.properties"></context:property-placeholder>
+<!--    配置数据源-->
+    <bean id="ds" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+        destroy-method="close">
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
+    </bean>
+
+
+
+<!--    配置事务管理器。控制数据源-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="ds"></property>
+    </bean>
+<!--    基于xml配置，配置事务-->
+    <aop:config>
+        <aop:pointcut id="txPoint" expression="execution(* wzy.service.*(..))"/>
+    </aop:config>
+<!--    配置事务增强、事务属性、事务建议-->
+    <tx:advice id="myTx" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" rollback-for="java.lang.Exception"/>
+            <tx:method name="query*" read-only="true"></tx:method>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--    配置mybatis操作数据库-->
+    <bean id="sessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--        指定配置文件位置-->
+        <property name="configLocation" value="classpath:Mybatis/mybatis-config.xml"></property>
+        <property name="dataSource" ref="ds"></property>
+        <!--        获取xml映射文件位置-->
+        <property name="mapperLocations" value="classpath:wzy/dao/*.xml"></property>
+
+    </bean>
+    <!--    把每一个dao接口加入到bean容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--        指定dao接口所在的包-->
+        <property name="basePackage" value="wzy.dao"></property>
+    </bean>
+
+</beans>
