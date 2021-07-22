@@ -56,5 +56,6 @@ public class test1 {
 
         int i = mapper.insertBatch(list);
         System.out.println(i);
+        System.out.println("pushTest");
     }
 }
